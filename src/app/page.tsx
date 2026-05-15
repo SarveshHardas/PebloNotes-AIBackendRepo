@@ -15,7 +15,6 @@ import Image from "next/image";
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {/* Nav Header */}
       <header className="px-6 lg:px-10 h-16 flex items-center border-b border-border/40 sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <Image src="/peblo-logo.png" alt="Peblo Notes" width={200} height={200} className="rounded-lg" />
@@ -28,12 +27,12 @@ export default function LandingPage() {
           <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block">
             Pricing
           </Link>
-          <Link href="#">
+          <Link href="/login">
             <Button size="sm" variant="ghost" className="font-sans">
               Sign In
             </Button>
           </Link>
-          <Link href="#">
+          <Link href="/signup">
             <Button size="sm" className="font-sans shadow-sm">
               Get Started
             </Button>
@@ -42,7 +41,6 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1 flex flex-col items-center">
-        {/* Hero Section */}
         <section className="w-full max-w-4xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight font-heading text-foreground text-balance leading-tight mb-6">
             Where ideas find a <span className="text-primary">beautiful</span> home.
@@ -64,11 +62,9 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features Preview / Mock Card */}
         <section className="w-full max-w-5xl mx-auto px-6 pb-24">
           <div className="relative rounded-2xl border border-border/60 bg-muted/20 p-2 shadow-2xl shadow-primary/5">
             <div className="rounded-xl border border-border/40 overflow-hidden bg-background aspect-[16/9] flex flex-col shadow-sm">
-              {/* Fake window bar */}
               <div className="h-10 border-b bg-muted/40 flex items-center px-4 gap-1.5">
                 <div className="size-3 rounded-full bg-red-400/60" />
                 <div className="size-3 rounded-full bg-amber-400/60" />
@@ -78,7 +74,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Real mini shell rendering inside the landing page for premium look */}
               <div className="flex flex-1">
                 <div className="w-44 border-r bg-muted/10 p-3 hidden sm:flex flex-col gap-4 font-sans text-xs">
                   <div className="h-4 w-20 bg-muted rounded" />
@@ -101,7 +96,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Feature Grid */}
         <section className="w-full bg-muted/30 border-y py-20 md:py-28">
           <div className="max-w-5xl mx-auto px-6 grid gap-8 md:grid-cols-3">
             <div className="flex flex-col gap-2">
@@ -131,7 +125,6 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="border-t py-10 text-center font-sans text-sm text-muted-foreground bg-background">
         <p>© {new Date().getFullYear()} Peblo Notes. Handcrafted for better workflows.</p>
       </footer>
