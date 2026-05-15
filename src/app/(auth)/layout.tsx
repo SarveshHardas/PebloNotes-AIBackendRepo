@@ -24,12 +24,12 @@ export default function AuthLayout({
 
         <div className="relative z-10 flex items-center gap-3">
           <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
-            <div className="relative h-6 w-48">
+            <div className="relative h-16 w-16">
               <Image
                 src="/peblo-logo.png"
                 alt="Peblo Notes"
                 fill
-                className="object-contain object-left scale-300 translate-x-36"
+                className="object-contain scale-300 translate-x-4"
                 priority
               />
             </div>
@@ -38,9 +38,6 @@ export default function AuthLayout({
 
         <div className="relative z-10 py-10">
           <div className="flex flex-col gap-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Sparkles className="h-5 w-5" />
-            </div>
             <div className="space-y-3">
               <h1 className="font-heading text-3xl xl:text-4xl font-bold tracking-tight text-foreground leading-[1.15]">
                 Capture context, <br />

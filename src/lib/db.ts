@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+// Explicitly load all model modules to guarantee Mongoose schema registry hydration
+import "@/models/User";
+import "@/models/Note";
+import "@/models/Tag";
+import "@/models/Category";
+
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;

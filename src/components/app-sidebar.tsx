@@ -1,20 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  BookOpen,
-  Clock,
-  Folder,
-  Home,
-  Moon,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Settings2,
-  Star,
-  Sun,
-} from "lucide-react"
-import { useTheme } from "next-themes"
+import * as React from "react";
+import { BookOpen, Home, LogOut, Sparkles, Archive } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -22,198 +12,130 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/sidebar";
+import Image from "next/image";
+
+function SidebarNavigationMenu() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const view = searchParams.get("view") || "active";
+  const isArchiveActive = view === "archived";
+  const isAllNotesActive = view === "active" || !searchParams.has("view");
+
+  return (
+    <SidebarMenu className="gap-1">
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          tooltip="All Notes" 
+          isActive={isAllNotesActive}
+          onClick={() => router.push("/dashboard")}
+          className={cn(
+            "font-sans text-[13px] py-5 transition-all",
+            isAllNotesActive 
+              ? "font-semibold bg-primary/5 text-primary hover:bg-primary/10" 
+              : "font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <BookOpen className={cn("size-4", isAllNotesActive ? "text-primary" : "text-muted-foreground")} />
+          <span>All Notes</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          tooltip="Archived Notes" 
+          isActive={isArchiveActive}
+          onClick={() => router.push("/dashboard?view=archived")}
+          className={cn(
+            "font-sans text-[13px] py-5 transition-all",
+            isArchiveActive 
+              ? "font-semibold bg-primary/5 text-primary hover:bg-primary/10" 
+              : "font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Archive className={cn("size-4", isArchiveActive ? "text-primary" : "text-muted-foreground")} />
+          <span>Archived Notes</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  );
+}
+
+function NavigationMenuSkeleton() {
+  return (
+    <div className="flex flex-col gap-2 px-2 animate-pulse">
+      <div className="h-8 w-full rounded-md bg-muted/20" />
+      <div className="h-8 w-full rounded-md bg-muted/20" />
+      <div className="h-8 w-full rounded-md bg-muted/20" />
+    </div>
+  );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { theme, setTheme } = useTheme()
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      toast.success("Successfully logged out.");
+      router.refresh();
+      router.push("/login");
+    } catch (e) {
+      toast.error("Logout failed.");
+    }
+  };
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="p-4 border-b border-border/5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-heading text-xl font-bold">
-                P
+            <div className="flex items-center gap-3 px-2 py-1.5 select-none">
+              <div className="grid flex-1 ml-1 text-left leading-tight font-sans group-data-[collapsible=icon]:hidden">
+                <span className="truncate text-2xl font-heading font-semibold tracking-tight text-foreground">
+                  Peblo Notes
+                </span>
+                <span className="truncate text-sm text-secondary-foreground/80 font-medium">
+                  Workspace
+                </span>
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-subheading font-semibold tracking-tight">Peblo Notes</span>
-                <span className="truncate text-xs text-muted-foreground font-sans">Personal Workspace</span>
-              </div>
-            </SidebarMenuButton>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+
+      <SidebarContent className="py-4">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Search" className="font-sans">
-                  <Search />
-                  <span>Quick Search</span>
-                  <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                    <span className="text-xs">⌘</span>K
-                  </kbd>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Dashboard" isActive className="font-sans">
-                  <Home />
-                  <span>Overview</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-subheading font-medium text-xs tracking-wide">Workspace</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <BookOpen />
-                  <span>All Notes</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <Star />
-                  <span>Favorites</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <Clock />
-                  <span>Recent</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <div className="flex items-center justify-between px-2 py-1">
-            <SidebarGroupLabel className="font-subheading font-medium text-xs tracking-wide">Folders</SidebarGroupLabel>
-            <button className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-              <Plus className="size-3.5" />
-            </button>
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <Folder className="text-blue-500" />
-                  <span>Project Alpha</span>
-                </SidebarMenuButton>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <SidebarMenuAction showOnHover>
-                        <MoreHorizontal />
-                        <span className="sr-only">More</span>
-                      </SidebarMenuAction>
-                    }
-                  />
-                  <DropdownMenuContent side="right" align="start">
-                    <DropdownMenuItem>Rename</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <Folder className="text-amber-500" />
-                  <span>Meeting Brainstorms</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton className="font-sans">
-                  <Folder className="text-emerald-500" />
-                  <span>Personal Musings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
+            <React.Suspense fallback={<NavigationMenuSkeleton />}>
+              <SidebarNavigationMenu />
+            </React.Suspense>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarFooter className="p-4 border-t border-border/5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <SidebarMenuButton
-                    size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  >
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 font-medium font-subheading">JD</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight font-sans">
-                      <span className="truncate font-medium">John Doe</span>
-                      <span className="truncate text-xs text-muted-foreground">john@example.com</span>
-                    </div>
-                    <MoreHorizontal className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                }
-              />
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="p-0 font-normal font-sans">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg font-semibold">JD</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">John Doe</span>
-                      <span className="truncate text-xs text-muted-foreground">john@example.com</span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className="font-sans">
-                  <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                    {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                    <span>Toggle Theme</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings2 className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive font-sans">
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              tooltip="Log out"
+              className="font-sans text-[13px] py-5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+            >
+              <LogOut className="size-4" />
+              <span>Log out</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

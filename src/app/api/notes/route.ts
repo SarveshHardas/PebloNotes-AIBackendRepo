@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
+import Tag from "@/models/Tag";
 import { getAuthUser } from "@/lib/auth";
 
 const createNoteSchema = z.object({
@@ -101,12 +102,16 @@ export async function GET(req: Request) {
 
     const query: any = { userId: authUser.id };
     
-    if (!includeArchived) {
+    if (includeArchived) {
+      query.archived = true;
+    } else {
       query.archived = false;
     }
 
     const notes = await Note.find(query)
       .sort({ updatedAt: -1 })
+      .populate("tags")
+      .populate("category")
       .lean();
     return NextResponse.json(
       {
