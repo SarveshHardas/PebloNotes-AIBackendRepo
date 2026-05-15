@@ -83,3 +83,45 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    const authUser = await getAuthUser();
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized access. Please sign in." },
+        { status: 401 }
+      );
+    }
+
+    await dbConnect();
+
+    const { searchParams } = new URL(req.url);
+    const includeArchived = searchParams.get("archived") === "true";
+
+    const query: any = { userId: authUser.id };
+    
+    if (!includeArchived) {
+      query.archived = false;
+    }
+
+    const notes = await Note.find(query)
+      .sort({ updatedAt: -1 })
+      .lean();
+    return NextResponse.json(
+      {
+        success: true,
+        count: notes.length,
+        notes,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("CRITICAL_FETCH_NOTES_ERROR:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error. Please try again later." },
+      { status: 500 }
+    );
+  }
+}
+
