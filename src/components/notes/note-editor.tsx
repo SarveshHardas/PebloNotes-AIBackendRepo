@@ -14,7 +14,10 @@ import {
   Layers,
   ChevronDown,
   X,
-  RotateCcw
+  RotateCcw,
+  Sparkles,
+  Copy,
+  ListTodo
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -67,6 +70,54 @@ export function NoteEditor({
   const [isCatLoading, setIsCatLoading] = React.useState(false);
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  const [summaryData, setSummaryData] = React.useState<{ summary: string; updatedAt: string } | null>(null);
+  const [isSummaryLoading, setIsSummaryLoading] = React.useState(true);
+  const [isGeneratingSummary, setIsGeneratingSummary] = React.useState(false);
+
+  React.useEffect(() => {
+    const loadSummary = async () => {
+      setIsSummaryLoading(true);
+      try {
+        const res = await fetch(`/api/notes/${note._id}/summary`);
+        const data = await res.json();
+        if (data.success && data.summary) {
+          setSummaryData(data.summary);
+        } else {
+          setSummaryData(null);
+        }
+      } catch {
+        setSummaryData(null);
+      } finally {
+        setIsSummaryLoading(false);
+      }
+    };
+    loadSummary();
+  }, [note._id]);
+
+  const [extractedTasks, setExtractedTasks] = React.useState<string[] | null>(null);
+  const [isTasksLoading, setIsTasksLoading] = React.useState(true);
+  const [isExtractingTasks, setIsExtractingTasks] = React.useState(false);
+
+  React.useEffect(() => {
+    const loadTasks = async () => {
+      setIsTasksLoading(true);
+      try {
+        const res = await fetch(`/api/notes/${note._id}/tasks`);
+        const data = await res.json();
+        if (data.success && data.tasks) {
+          setExtractedTasks(data.tasks);
+        } else {
+          setExtractedTasks(null);
+        }
+      } catch {
+        setExtractedTasks(null);
+      } finally {
+        setIsTasksLoading(false);
+      }
+    };
+    loadTasks();
+  }, [note._id]);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -316,6 +367,73 @@ export function NoteEditor({
     }
   };
 
+  const handleGenerateSummary = async () => {
+    if (!content || content.trim().length < 20) {
+      toast.info("Write a bit more detail before invoking the AI summary.", { duration: 3000 });
+      return;
+    }
+
+    setIsGeneratingSummary(true);
+    try {
+      const res = await fetch(`/api/notes/${note._id}/summary`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSummaryData(data.summary);
+        toast.success("Generated modern summary.");
+      } else {
+        toast.error(data.error || "Failed to generate summary.");
+      }
+    } catch (err) {
+      toast.error("Summarization offline. Please try again.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
+  const handleCopySummary = () => {
+    if (!summaryData) return;
+    navigator.clipboard.writeText(summaryData.summary);
+    toast.success("Copied AI summary.");
+  };
+
+  const handleExtractTasks = async () => {
+    if (!content || content.trim().length < 30) {
+      toast.info("Add more detail before asking to parse action items.", { duration: 3000 });
+      return;
+    }
+
+    setIsExtractingTasks(true);
+    try {
+      const res = await fetch(`/api/notes/${note._id}/tasks`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExtractedTasks(data.tasks);
+        if (data.tasks.length === 0) {
+          toast.info("Processed successfully, but found no concrete actions.");
+        } else {
+          toast.success(`Isolated ${data.tasks.length} action items.`);
+        }
+      } else {
+        toast.error(data.error || "Failed parsing tasks.");
+      }
+    } catch (err) {
+      toast.error("Task extractor currently unreachable.");
+    } finally {
+      setIsExtractingTasks(false);
+    }
+  };
+
+  const handleCopyTasks = () => {
+    if (!extractedTasks || extractedTasks.length === 0) return;
+    const formatted = extractedTasks.map((t) => `- [ ] ${t}`).join("\n");
+    navigator.clipboard.writeText(formatted);
+    toast.success("Copied checklist items.");
+  };
+
   const saveRef = React.useRef(handleSave);
   React.useEffect(() => {
     saveRef.current = handleSave;
@@ -409,6 +527,52 @@ export function NoteEditor({
           >
             <Save className="mr-1.5 h-3.5 w-3.5" />
             {isSaving ? "Saving..." : "Save"}
+          </Button>
+
+          <div className="w-px h-4 bg-border/40 mx-1" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGenerateSummary}
+            disabled={isGeneratingSummary || !content || content.trim().length < 20}
+            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40"
+            title="Summarize this note using AI"
+          >
+            {isGeneratingSummary ? (
+              <>
+                <span className="h-3 w-3 border-t-2 border-muted-foreground rounded-full animate-spin mr-1.5" />
+                Thinking...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-1.5 h-3.5 w-3.5 opacity-60" />
+                Summarize
+              </>
+            )}
+          </Button>
+
+          <div className="w-px h-4 bg-border/40 mx-1" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleExtractTasks}
+            disabled={isExtractingTasks || !content || content.trim().length < 30}
+            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40"
+            title="Extract concrete action items using AI"
+          >
+            {isExtractingTasks ? (
+              <>
+                <span className="h-3 w-3 border-t-2 border-muted-foreground rounded-full animate-spin mr-1.5" />
+                Extracting...
+              </>
+            ) : (
+              <>
+                <ListTodo className="mr-1.5 h-3.5 w-3.5 opacity-60" />
+                Extract Tasks
+              </>
+            )}
           </Button>
 
           <div className="w-px h-4 bg-border/40 mx-1" />
@@ -584,6 +748,107 @@ export function NoteEditor({
               )}
             </div>
           </div>
+
+          {(isGeneratingSummary || summaryData) && (
+            <div className="animate-in fade-in slide-in-from-top-1 duration-200 p-4 rounded-xl border bg-zinc-50/40 dark:bg-zinc-900/20 border-border/40 flex flex-col gap-2.5 relative group mt-1 shadow-[0_1px_2px_rgba(0,0,0,0.02)] select-text">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-sans font-bold text-muted-foreground/70">
+                  <Sparkles className="h-3 w-3 text-muted-foreground/60" />
+                  <span>AI Summary</span>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {summaryData && !isGeneratingSummary && (
+                    <>
+                      <button
+                        onClick={handleCopySummary}
+                        className="h-5.5 w-5.5 flex items-center justify-center rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        title="Copy summary text"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={handleGenerateSummary}
+                        className="h-5.5 w-5.5 flex items-center justify-center rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        title="Regenerate Summary"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {isGeneratingSummary ? (
+                <div className="flex flex-col gap-2 py-1 select-none">
+                  <div className="h-3 bg-muted/60 animate-pulse rounded w-[95%]" />
+                  <div className="h-3 bg-muted/60 animate-pulse rounded w-[70%]" />
+                </div>
+              ) : (
+                <p className="text-[12.5px] leading-relaxed text-zinc-700 dark:text-zinc-300 font-sans tracking-normal">
+                  {summaryData?.summary}
+                </p>
+              )}
+              
+              {summaryData && !isGeneratingSummary && (
+                <div className="text-[9.5px] text-muted-foreground/40 select-none font-sans self-end italic">
+                  Generated {new Date(summaryData.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {(isExtractingTasks || (extractedTasks && extractedTasks.length > 0)) && (
+            <div className="animate-in fade-in slide-in-from-top-1 duration-200 p-4 rounded-xl border bg-zinc-50/30 dark:bg-zinc-900/10 border-border/30 flex flex-col gap-2.5 relative group shadow-[0_1px_2px_rgba(0,0,0,0.01)] select-text mt-1">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-sans font-bold text-muted-foreground/70">
+                  <ListTodo className="h-3.5 w-3.5 text-muted-foreground/60" />
+                  <span>Action Items</span>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {extractedTasks && extractedTasks.length > 0 && !isExtractingTasks && (
+                    <>
+                      <button
+                        onClick={handleCopyTasks}
+                        className="h-5.5 w-5.5 flex items-center justify-center rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        title="Copy tasks to clipboard (as Markdown checklist)"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={handleExtractTasks}
+                        className="h-5.5 w-5.5 flex items-center justify-center rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        title="Regenerate Tasks"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {isExtractingTasks ? (
+                <div className="flex flex-col gap-2.5 py-1 select-none">
+                  <div className="flex items-center gap-2 animate-pulse">
+                    <div className="h-3.5 w-3.5 bg-muted/60 rounded flex-shrink-0" />
+                    <div className="h-3 bg-muted/60 rounded w-[85%]" />
+                  </div>
+                  <div className="flex items-center gap-2 animate-pulse">
+                    <div className="h-3.5 w-3.5 bg-muted/60 rounded flex-shrink-0" />
+                    <div className="h-3 bg-muted/60 rounded w-[60%]" />
+                  </div>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-2.5 mt-0.5">
+                  {extractedTasks?.map((task, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-[12.5px] font-sans text-zinc-700 dark:text-zinc-300 tracking-normal leading-tight">
+                      <div className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 border border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-transparent flex items-center justify-center select-none" />
+                      <span className="pt-[1px]">{task}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           <textarea
             ref={textareaRef}
