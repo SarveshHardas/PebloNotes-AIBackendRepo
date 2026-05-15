@@ -99,6 +99,9 @@ export function NoteEditor({
   const [isTasksLoading, setIsTasksLoading] = React.useState(true);
   const [isExtractingTasks, setIsExtractingTasks] = React.useState(false);
 
+  const [suggestedTitle, setSuggestedTitle] = React.useState<string | null>(null);
+  const [isSuggestingTitle, setIsSuggestingTitle] = React.useState(false);
+
   React.useEffect(() => {
     const loadTasks = async () => {
       setIsTasksLoading(true);
@@ -434,6 +437,39 @@ export function NoteEditor({
     toast.success("Copied checklist items.");
   };
 
+  const handleSuggestTitle = async () => {
+    if (!content || content.trim().length < 25) {
+      toast.info("Type at least 25 characters of note text to derive a title.", { duration: 3000 });
+      return;
+    }
+
+    setIsSuggestingTitle(true);
+    try {
+      const res = await fetch(`/api/notes/${note._id}/suggest-title`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuggestedTitle(data.title);
+        toast.success("Generated modern title suggestion.");
+      } else {
+        toast.error(data.error || "Unable to suggest title.");
+      }
+    } catch {
+      toast.error("Title suggestions temporarily offline.");
+    } finally {
+      setIsSuggestingTitle(false);
+    }
+  };
+
+  const handleApplyTitle = () => {
+    if (!suggestedTitle) return;
+    setTitle(suggestedTitle);
+    setSaveState("dirty");
+    setSuggestedTitle(null);
+    toast.success("Title applied successfully.");
+  };
+
   const saveRef = React.useRef(handleSave);
   React.useEffect(() => {
     saveRef.current = handleSave;
@@ -622,13 +658,67 @@ export function NoteEditor({
       <div className="flex-1 overflow-y-auto p-6 md:p-10 xl:p-14 custom-scrollbar">
         <div className="mx-auto max-w-[700px] flex flex-col gap-6">
           
-          <input
-            type="text"
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Untitled Note"
-            className="w-full bg-transparent border-none outline-none font-heading font-bold text-3xl md:text-4xl tracking-tight text-foreground placeholder:text-muted-foreground/25 py-1 transition-colors"
-          />
+          <div className="relative group/title">
+            <div className="flex items-center justify-between h-5 mb-0.5">
+              <button
+                onClick={handleSuggestTitle}
+                disabled={isSuggestingTitle || !content || content.trim().length < 25}
+                className="opacity-0 group-hover/title:opacity-100 disabled:opacity-0 transition-all inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold font-sans text-muted-foreground/60 hover:text-primary cursor-pointer select-none active:scale-95 disabled:pointer-events-none"
+                title="Deduce note title automatically using AI"
+              >
+                {isSuggestingTitle ? (
+                  <>
+                    <span className="h-2.5 w-2.5 border-t border-muted-foreground rounded-full animate-spin" />
+                    Thinking...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3 w-3" />
+                    Suggest Title
+                  </>
+                )}
+              </button>
+            </div>
+
+            <input
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+              placeholder="Untitled Note"
+              className="w-full bg-transparent border-none outline-none font-heading font-bold text-3xl md:text-4xl tracking-tight text-foreground placeholder:text-muted-foreground/25 py-1 transition-colors"
+            />
+          </div>
+
+          {suggestedTitle && (
+            <div className="animate-in fade-in slide-in-from-top-1 duration-200 flex items-center flex-wrap gap-2 px-3 py-1.5 rounded-lg border bg-zinc-50/50 dark:bg-zinc-900/30 border-border/30 w-fit shadow-sm -mt-2">
+              <span className="text-[10.5px] font-sans text-muted-foreground font-medium select-none">AI Concept:</span>
+              <span className="text-[12px] font-semibold font-sans text-zinc-800 dark:text-zinc-200">"{suggestedTitle}"</span>
+              
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border/40 h-4">
+                <button
+                  onClick={handleApplyTitle}
+                  className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-sans font-bold hover:bg-primary/20 transition-colors cursor-pointer"
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={handleSuggestTitle}
+                  disabled={isSuggestingTitle}
+                  className="p-1 rounded hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-40"
+                  title="Regenerate suggestion"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={() => setSuggestedTitle(null)}
+                  className="p-1 rounded hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                  title="Dismiss suggestion"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row sm:items-center flex-wrap gap-x-6 gap-y-3 pb-4 pt-1 border-b border-border/10">
             
