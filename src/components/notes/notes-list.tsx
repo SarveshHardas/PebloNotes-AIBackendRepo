@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Search, Plus, FileText, CalendarDays } from "lucide-react";
+import { Search, Plus, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export interface ITagData {
   _id: string;
@@ -60,16 +61,40 @@ export function NotesList({
   viewTitle = "All Notes",
 }: NotesListProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  
+  const [searchResults, setSearchResults] = React.useState<NoteItemData[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
 
-  const filteredNotes = React.useMemo(() => {
-    if (!searchQuery.trim()) return notes;
-    const q = searchQuery.toLowerCase();
-    return notes.filter(
-      (n) =>
-        n.title.toLowerCase().includes(q) ||
-        (n.content && n.content.toLowerCase().includes(q))
-    );
-  }, [notes, searchQuery]);
+  React.useEffect(() => {
+    async function performSearch() {
+      if (!debouncedSearchQuery.trim()) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const isArchived = viewTitle === "Archived Notes";
+        const res = await fetch(`/api/notes/search?q=${encodeURIComponent(debouncedSearchQuery)}&archived=${isArchived}`);
+        const data = await res.json();
+        if (data.success) {
+          setSearchResults(data.notes);
+        }
+      } catch (error) {
+        console.error("Search failed:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }
+
+    performSearch();
+  }, [debouncedSearchQuery, viewTitle]);
+
+  const isSearchActive = debouncedSearchQuery.trim().length > 0;
+  const displayNotes = isSearchActive ? searchResults : notes;
+  const showLoading = isLoading || isSearching;
 
   return (
     <div className="flex h-full w-full flex-col border-r border-border/40 bg-background select-none animate-in fade-in duration-200">
@@ -87,11 +112,17 @@ export function NotesList({
           </button>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/70" />
+        <div className="relative group">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 transition-colors group-focus-within:text-primary/70">
+            {isSearching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Search className="h-3.5 w-3.5" />
+            )}
+          </div>
           <input
             type="text"
-            placeholder="Quick search..."
+            placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8.5 w-full rounded-lg border bg-muted/20 pl-9 pr-3 font-sans text-[13px] placeholder:text-muted-foreground/60 transition-all focus:border-primary/40 focus:bg-background focus:ring-2 focus:ring-primary/5 outline-none"
@@ -100,7 +131,7 @@ export function NotesList({
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar py-2">
-        {isLoading ? (
+        {showLoading ? (
           <div className="flex flex-col gap-1 px-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex flex-col gap-2 p-4 rounded-xl bg-muted/5 animate-pulse">
@@ -110,14 +141,21 @@ export function NotesList({
               </div>
             ))}
           </div>
-        ) : filteredNotes.length === 0 ? (
+        ) : displayNotes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center text-muted-foreground/60">
-            <FileText className="h-6 w-6 mb-2 opacity-50" />
-            <p className="font-sans text-[13px]">No notes found.</p>
+            <FileText className="h-6 w-6 mb-3 opacity-30" />
+            <p className="font-sans text-[13px] font-medium text-foreground/70 mb-1">
+              {isSearchActive ? "No matches found" : "No notes yet"}
+            </p>
+            <p className="font-sans text-[12px] text-muted-foreground/70">
+              {isSearchActive 
+                ? "Try a different keyword or phrasing." 
+                : "Create a note to start capturing your ideas."}
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-0.5 px-2">
-            {filteredNotes.map((note) => {
+            {displayNotes.map((note) => {
               const isActive = activeNoteId === note._id;
               
               return (
