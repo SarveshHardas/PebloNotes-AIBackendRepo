@@ -18,7 +18,7 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background">
       <header className="px-6 lg:px-10 h-16 flex items-center border-b border-border/40 sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <Image src="/peblo-logo.png" alt="Peblo Notes" width={110} height={110} className="rounded-lg" />
+          <Image src="/peblo-logo.png" alt="Peblo Notes" width={85} height={85} className="rounded-lg" />
         </div>
 
         <nav className="ml-auto flex items-center gap-4 md:gap-6 font-sans">
