@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FileText, Archive, Sparkles, ArrowLeft, Loader2, RefreshCcw } from "lucide-react";
+import { FileText, Archive, Sparkles, ArrowLeft, Loader2, RefreshCcw, Hash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   BarChart,

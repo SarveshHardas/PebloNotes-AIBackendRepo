@@ -45,8 +45,8 @@ export async function GET(req: Request, context: RouteContext) {
     const sanitizedNote = {
       title: note.title,
       content: note.content,
-      tags: note.tags?.map((t: any) => t.name) || [],
-      category: note.category?.name || null,
+      tags: (note.tags as any[])?.map((t: any) => t.name) || [],
+      category: (note.category as any)?.name || null,
       updatedAt: note.updatedAt,
     };
 
