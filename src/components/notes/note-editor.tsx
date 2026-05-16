@@ -17,7 +17,8 @@ import {
   RotateCcw,
   Sparkles,
   Copy,
-  ListTodo
+  ListTodo,
+  Share
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,8 @@ interface NoteEditorProps {
   onNoteDeleted: (id: string) => void;
 }
 
+import { ShareModal } from "./share-modal";
+
 export function NoteEditor({
   note,
   onBackToList,
@@ -59,6 +62,7 @@ export function NoteEditor({
   const [isSaving, setIsSaving] = React.useState(false);
   
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
   
   const [isAddingTag, setIsAddingTag] = React.useState(false);
   const [newTagName, setNewTagName] = React.useState("");
@@ -633,6 +637,19 @@ export function NoteEditor({
           </Button>
 
           <div className="w-px h-4 bg-border/40 mx-1" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900"
+            onClick={() => setIsShareModalOpen(true)}
+            title="Share note to web"
+          >
+            <Share className="mr-1.5 h-3.5 w-3.5" />
+            Share
+          </Button>
+
+          <div className="w-px h-4 bg-border/40 mx-1" />
           
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -983,6 +1000,11 @@ export function NoteEditor({
         </DialogContent>
       </Dialog>
 
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onOpenChange={setIsShareModalOpen}
+        noteId={note._id}
+      />
     </div>
   );
 }
