@@ -102,10 +102,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLogout = async () => {
     try {
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-      toast.success("Successfully logged out.");
-      router.refresh();
-      router.push("/login");
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Successfully logged out.");
+        router.refresh();
+        router.push("/login");
+      } else {
+        toast.error("Logout failed.");
+      }
     } catch (e) {
       toast.error("Logout failed.");
     }
