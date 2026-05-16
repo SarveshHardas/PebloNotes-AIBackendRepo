@@ -42,8 +42,17 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      <main className="flex-1 flex flex-col items-center">
-        <section className="w-full max-w-4xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center text-center">
+      <main className="flex-1 flex flex-col items-center w-full relative">
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.08] dark:opacity-[0.1]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+            backgroundSize: "24px 24px",
+            maskImage: "linear-gradient(to bottom, black 10%, transparent 60%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 10%, transparent 60%)"
+          }}
+        />
+        <section className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight font-heading text-foreground text-balance leading-tight mb-6">
             Where ideas find a <span className="text-primary">beautiful</span> home.
           </h1>
@@ -53,14 +62,16 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Link href="/dashboard" className="w-full sm:w-auto">
+            <Link href="/signup" className="w-full sm:w-auto">
               <Button size="lg" className="w-full font-sans text-base h-12 px-8 rounded-xl shadow-sm">
-                Go to Dashboard <ArrowRight className="ml-2 size-4" />
+                Get Started <ArrowRight className="ml-2 size-4" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto font-sans text-base h-12 px-8 rounded-xl">
-              Read Docs
-            </Button>
+            <Link href={"/login"}>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto font-sans text-base h-12 px-8 rounded-xl">
+                Already signed up? Log In
+              </Button>
+            </Link>
           </div>
         </section>
 

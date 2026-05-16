@@ -180,16 +180,16 @@ export default function AnalyticsDashboard() {
                       dataKey="tag" 
                       tickLine={false} 
                       axisLine={false} 
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} 
+                      tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} 
                       dy={10}
                     />
                     <YAxis 
                       tickLine={false} 
                       axisLine={false} 
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} 
+                      tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} 
                       allowDecimals={false}
                     />
-                    <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.3)' }} content={<CustomTooltip />} />
+                    <Tooltip cursor={{ fill: 'var(--muted)' }} content={<CustomTooltip />} />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={48}>
                       {data.topTags.map((entry, index) => (
                         <Cell key={`cell-${index}`} className="fill-primary/70 hover:fill-primary/90 transition-colors duration-300" />

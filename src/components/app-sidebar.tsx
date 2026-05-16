@@ -98,6 +98,26 @@ function NavigationMenuSkeleton() {
   );
 }
 
+import { useSidebar } from "@/components/ui/sidebar";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+function SidebarToggle() {
+  const { state, toggleSidebar } = useSidebar();
+  
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-muted group-data-[collapsible=icon]:mx-auto"
+      onClick={toggleSidebar}
+      title="Toggle Sidebar"
+    >
+      {state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+    </Button>
+  );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
 
@@ -119,18 +139,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="p-4 border-b border-border/5">
+      <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 border-b border-border/5">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-3 px-2 py-1.5 select-none">
-              <div className="grid flex-1 ml-1 text-left leading-tight font-sans group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-2xl font-heading font-semibold tracking-tight text-foreground">
-                  Peblo Notes
-                </span>
+            <div className="flex items-center justify-between w-full">
+              <div className="grid flex-1 ml-1 text-left leading-tight font-sans group-data-[collapsible=icon]:hidden px-2">
+                <Image src="/peblo-logo.png" alt="Peblo Notes" width={120} height={120} className="-translate-x-[30px]" />
                 <span className="truncate text-sm text-secondary-foreground/80 font-medium">
-                  Workspace
+                  Notes Workspace
                 </span>
               </div>
+              <SidebarToggle />
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

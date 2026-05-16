@@ -133,16 +133,6 @@ function DashboardContent() {
           !isMobile && "flex"
         )}
       >
-        <div className="hidden md:flex absolute top-3.5 left-4 z-50 group">
-          <button
-            onClick={() => toggleSidebar()}
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-background border border-border/40 opacity-0 group-hover:opacity-100 hover:opacity-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.05)] active:scale-95 transition-all duration-200 cursor-pointer"
-            title="Toggle Sidebar navigation"
-          >
-            <Menu className="h-3.5 w-3.5 text-muted-foreground" />
-          </button>
-        </div>
-
         {selectedNote ? (
           <NoteEditor
             key={selectedNote._id}
