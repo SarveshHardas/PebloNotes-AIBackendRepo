@@ -31,7 +31,7 @@ export default function AuthLayout({
                 alt="Peblo Notes"
                 width={85}
                 height={85}
-                className="object-contain -ml-4"
+                className="object-contain"
                 priority
               />
             </div>
