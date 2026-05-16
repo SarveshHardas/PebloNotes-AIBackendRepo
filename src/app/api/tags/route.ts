@@ -13,7 +13,6 @@ const createTagSchema = z.object({
     .transform((val) => val.toLowerCase()),
 });
 
-// 🏷️ POST: Fetch or Create Tag (Ensures no duplicates)
 export async function POST(req: Request) {
   try {
     const authUser = await getAuthUser();
@@ -50,7 +49,6 @@ export async function POST(req: Request) {
   }
 }
 
-// 🏷️ GET: Fetch all tags for active user
 export async function GET() {
   try {
     const authUser = await getAuthUser();

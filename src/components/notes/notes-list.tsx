@@ -42,11 +42,11 @@ function formatTime(dateString: string | Date) {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    
+
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHrs < 24) return `${diffHrs}h ago`;
-    
+
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   } catch (e) {
     return "";
@@ -67,7 +67,7 @@ export function NotesList({
 
   const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  
+
   const [searchResults, setSearchResults] = React.useState<NoteItemData[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
 
@@ -132,11 +132,11 @@ export function NotesList({
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value && value !== "none" && value !== "updatedAt_desc") {
-       params.set(key, value);
+      params.set(key, value);
     } else if (value === "none" && key === "category") {
-       params.set(key, value);
+      params.set(key, value);
     } else {
-       params.delete(key);
+      params.delete(key);
     }
     router.push(`${pathname}?${params.toString()}`);
   };
@@ -187,8 +187,8 @@ export function NotesList({
         </div>
 
         <div className="flex items-center gap-2 pt-0.5 overflow-x-auto custom-scrollbar pb-1">
-          <select 
-            className="h-7 min-w-[115px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+          <select
+            className="h-7 min-w-[115px] rounded-md border border-border/50 bg-transparent px-2 text-[10px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
             value={currentSort}
             onChange={(e) => updateFilter("sort", e.target.value)}
           >
@@ -198,8 +198,8 @@ export function NotesList({
             <option value="title_desc">Title (Z-A)</option>
           </select>
 
-          <select 
-            className="h-7 min-w-[100px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+          <select
+            className="h-7 min-w-[100px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[10px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
             value={currentCategory}
             onChange={(e) => updateFilter("category", e.target.value)}
           >
@@ -208,8 +208,8 @@ export function NotesList({
             {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
 
-          <select 
-            className="h-7 min-w-[90px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+          <select
+            className="h-7 min-w-[90px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[10px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
             value={currentTag}
             onChange={(e) => updateFilter("tag", e.target.value)}
           >
@@ -237,12 +237,12 @@ export function NotesList({
               {hasFilters ? "No matching notes" : "No notes yet"}
             </p>
             <p className="font-sans text-[12px] text-muted-foreground/70 mb-4">
-              {hasFilters 
-                ? "Try adjusting your search or filters." 
+              {hasFilters
+                ? "Try adjusting your search or filters."
                 : "Create a note to start capturing your ideas."}
             </p>
             {hasFilters && (
-              <button 
+              <button
                 onClick={clearFilters}
                 className="text-[11.5px] font-medium text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-md transition-colors active:scale-95"
               >
@@ -254,7 +254,7 @@ export function NotesList({
           <div className="flex flex-col gap-0.5 px-2">
             {displayNotes.map((note) => {
               const isActive = activeNoteId === note._id;
-              
+
               return (
                 <button
                   key={note._id}

@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function SidebarNavigationMenu() {
   const router = useRouter();
@@ -147,6 +148,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter className="p-4 border-t border-border/5">
         <SidebarMenu>
+          <SidebarMenuItem>
+            <ThemeToggle />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleLogout}

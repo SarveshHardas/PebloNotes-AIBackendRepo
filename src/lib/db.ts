@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Explicitly load all model modules to guarantee Mongoose schema registry hydration
 import "@/models/User";
 import "@/models/Note";
 import "@/models/Tag";

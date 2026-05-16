@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BookOpen, Compass, Sparkles } from "lucide-react";
+import { StandaloneThemeToggle } from "@/components/standalone-theme-toggle";
 
 export default function AuthLayout({
   children,
@@ -91,7 +92,11 @@ export default function AuthLayout({
         </div>
       </div>
 
-      <main className="lg:col-span-7 xl:col-span-8 flex flex-col px-6 md:px-12 lg:px-16 xl:px-24 py-10 justify-center">
+      <main className="lg:col-span-7 xl:col-span-8 flex flex-col px-6 md:px-12 lg:px-16 xl:px-24 py-10 justify-center relative">
+        <div className="absolute top-6 right-6 lg:top-10 lg:right-10 z-50">
+          <StandaloneThemeToggle />
+        </div>
+
         <div className="mx-auto w-full max-w-[400px]">
           <div className="lg:hidden flex justify-center mb-8">
             <div className="relative h-16 w-48">

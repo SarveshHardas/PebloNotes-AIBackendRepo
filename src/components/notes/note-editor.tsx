@@ -18,7 +18,8 @@ import {
   Sparkles,
   Copy,
   ListTodo,
-  Share
+  Share,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -547,13 +548,13 @@ export function NoteEditor({
             size="sm"
             onClick={handleGenerateSummary}
             disabled={isGeneratingSummary || !content || content.trim().length < 20}
-            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40"
+            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors"
             title="Summarize this note using AI"
           >
             {isGeneratingSummary ? (
               <>
-                <span className="h-3 w-3 border-t-2 border-muted-foreground rounded-full animate-spin mr-1.5" />
-                Thinking...
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin opacity-60" />
+                Summarizing...
               </>
             ) : (
               <>
@@ -568,12 +569,12 @@ export function NoteEditor({
             size="sm"
             onClick={handleExtractTasks}
             disabled={isExtractingTasks || !content || content.trim().length < 30}
-            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40"
+            className="h-8 px-3 font-sans text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 disabled:opacity-40 transition-colors"
             title="Extract concrete action items using AI"
           >
             {isExtractingTasks ? (
               <>
-                <span className="h-3 w-3 border-t-2 border-muted-foreground rounded-full animate-spin mr-1.5" />
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin opacity-60" />
                 Extracting...
               </>
             ) : (
@@ -620,7 +621,7 @@ export function NoteEditor({
             className={cn(
               "h-8 px-3 font-sans text-xs font-medium transition-all active:scale-[0.98]",
               saveState === "dirty"
-                ? "bg-primary text-black hover:bg-primary/90 shadow-sm"
+                ? "bg-primary hover:bg-primary/90 shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-900 border-border/40"
             )}
             onClick={() => handleSave(true)}
@@ -677,8 +678,8 @@ export function NoteEditor({
               >
                 {isSuggestingTitle ? (
                   <>
-                    <span className="h-2.5 w-2.5 border-t border-muted-foreground rounded-full animate-spin" />
-                    Thinking...
+                    <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                    Suggesting...
                   </>
                 ) : (
                   <>
@@ -700,7 +701,7 @@ export function NoteEditor({
 
           {suggestedTitle && (
             <div className="animate-in fade-in slide-in-from-top-1 duration-200 flex items-center flex-wrap gap-2 px-3 py-1.5 rounded-lg border bg-zinc-50/50 dark:bg-zinc-900/30 border-border/30 w-fit shadow-sm -mt-2">
-              <span className="text-[10.5px] font-sans text-muted-foreground font-medium select-none">AI Concept:</span>
+              <span className="text-[10.5px] font-sans text-muted-foreground font-medium select-none">Suggestion:</span>
               <span className="text-[12px] font-semibold font-sans text-zinc-800 dark:text-zinc-200">"{suggestedTitle}"</span>
 
               <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border/40 h-4">

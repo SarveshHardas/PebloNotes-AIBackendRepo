@@ -11,6 +11,7 @@ import {
   Zap
 } from "lucide-react";
 import Image from "next/image";
+import { StandaloneThemeToggle } from "@/components/standalone-theme-toggle";
 
 export default function LandingPage() {
   return (
@@ -37,6 +38,7 @@ export default function LandingPage() {
               Get Started
             </Button>
           </Link>
+          <StandaloneThemeToggle />
         </nav>
       </header>
 
