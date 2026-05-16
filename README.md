@@ -128,6 +128,16 @@ The project is structured as a monolith using Next.js.
 - **Analytics**:
   ![Analytics API](./public/postman-api/analytics.png)
 
+### Database Schema (MongoDB)
+- **Collections Overview**:
+  ![Database Collections](./public/db/database-collection.png)
+- **Document Previews**:
+  ![Users Collection](./public/db/users.png)
+  ![Notes Collection](./public/db/notes.png)
+  ![Categories Collection](./public/db/categories.png)
+  ![AI History Collection](./public/db/aihist.png)
+  ![Summaries Collection](./public/db/summaries.png)
+
 ## Architecture Notes
 
 - **Next.js App Router**: Chosen for its simplified server-side API integration (`/api` routes) and native edge computing support.
