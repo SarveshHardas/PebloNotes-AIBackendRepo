@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Search, Plus, FileText, Loader2 } from "lucide-react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -60,11 +61,40 @@ export function NotesList({
   onCreateNote,
   viewTitle = "All Notes",
 }: NotesListProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   
   const [searchResults, setSearchResults] = React.useState<NoteItemData[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
+
+  const [tags, setTags] = React.useState<ITagData[]>([]);
+  const [categories, setCategories] = React.useState<ICategoryData[]>([]);
+
+  const currentTag = searchParams.get("tag") || "";
+  const currentCategory = searchParams.get("category") || "";
+  const currentSort = searchParams.get("sort") || "updatedAt_desc";
+
+  React.useEffect(() => {
+    async function loadMetadata() {
+      try {
+        const [tagsRes, catRes] = await Promise.all([
+          fetch("/api/tags"),
+          fetch("/api/categories")
+        ]);
+        const tagsData = await tagsRes.json();
+        const catData = await catRes.json();
+        if (tagsData.success) setTags(tagsData.tags);
+        if (catData.success) setCategories(catData.categories);
+      } catch (error) {
+        console.error("Failed to fetch filter metadata");
+      }
+    }
+    loadMetadata();
+  }, []);
 
   React.useEffect(() => {
     async function performSearch() {
@@ -77,7 +107,14 @@ export function NotesList({
       setIsSearching(true);
       try {
         const isArchived = viewTitle === "Archived Notes";
-        const res = await fetch(`/api/notes/search?q=${encodeURIComponent(debouncedSearchQuery)}&archived=${isArchived}`);
+        const params = new URLSearchParams();
+        params.append("q", debouncedSearchQuery);
+        params.append("archived", String(isArchived));
+        if (currentTag) params.append("tag", currentTag);
+        if (currentCategory) params.append("category", currentCategory);
+        if (currentSort) params.append("sort", currentSort);
+
+        const res = await fetch(`/api/notes/search?${params.toString()}`);
         const data = await res.json();
         if (data.success) {
           setSearchResults(data.notes);
@@ -90,15 +127,35 @@ export function NotesList({
     }
 
     performSearch();
-  }, [debouncedSearchQuery, viewTitle]);
+  }, [debouncedSearchQuery, viewTitle, currentTag, currentCategory, currentSort]);
+
+  const updateFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "none" && value !== "updatedAt_desc") {
+       params.set(key, value);
+    } else if (value === "none" && key === "category") {
+       params.set(key, value);
+    } else {
+       params.delete(key);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    const params = new URLSearchParams();
+    if (viewTitle === "Archived Notes") params.set("view", "archived");
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const isSearchActive = debouncedSearchQuery.trim().length > 0;
   const displayNotes = isSearchActive ? searchResults : notes;
   const showLoading = isLoading || isSearching;
+  const hasFilters = isSearchActive || currentTag || currentCategory;
 
   return (
     <div className="flex h-full w-full flex-col border-r border-border/40 bg-background select-none animate-in fade-in duration-200">
-      <div className="flex flex-col gap-4 p-5 pb-4 border-b border-border/10">
+      <div className="flex flex-col gap-3 p-5 pb-3 border-b border-border/10">
         <div className="flex items-center justify-between">
           <h2 className="font-subheading font-semibold text-base tracking-tight text-foreground capitalize">
             {viewTitle}
@@ -112,7 +169,7 @@ export function NotesList({
           </button>
         </div>
 
-        <div className="relative group">
+        <div className="relative group mt-1">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 transition-colors group-focus-within:text-primary/70">
             {isSearching ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -127,6 +184,38 @@ export function NotesList({
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8.5 w-full rounded-lg border bg-muted/20 pl-9 pr-3 font-sans text-[13px] placeholder:text-muted-foreground/60 transition-all focus:border-primary/40 focus:bg-background focus:ring-2 focus:ring-primary/5 outline-none"
           />
+        </div>
+
+        <div className="flex items-center gap-2 pt-0.5 overflow-x-auto custom-scrollbar pb-1">
+          <select 
+            className="h-7 min-w-[115px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+            value={currentSort}
+            onChange={(e) => updateFilter("sort", e.target.value)}
+          >
+            <option value="updatedAt_desc">Recently Updated</option>
+            <option value="updatedAt_asc">Oldest Updated</option>
+            <option value="title_asc">Title (A-Z)</option>
+            <option value="title_desc">Title (Z-A)</option>
+          </select>
+
+          <select 
+            className="h-7 min-w-[100px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+            value={currentCategory}
+            onChange={(e) => updateFilter("category", e.target.value)}
+          >
+            <option value="">All Categories</option>
+            <option value="none">Uncategorized</option>
+            {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+          </select>
+
+          <select 
+            className="h-7 min-w-[90px] max-w-[140px] rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all cursor-pointer"
+            value={currentTag}
+            onChange={(e) => updateFilter("tag", e.target.value)}
+          >
+            <option value="">All Tags</option>
+            {tags.map(t => <option key={t._id} value={t._id}>#{t.name}</option>)}
+          </select>
         </div>
       </div>
 
@@ -145,13 +234,21 @@ export function NotesList({
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center text-muted-foreground/60">
             <FileText className="h-6 w-6 mb-3 opacity-30" />
             <p className="font-sans text-[13px] font-medium text-foreground/70 mb-1">
-              {isSearchActive ? "No matches found" : "No notes yet"}
+              {hasFilters ? "No matching notes" : "No notes yet"}
             </p>
-            <p className="font-sans text-[12px] text-muted-foreground/70">
-              {isSearchActive 
-                ? "Try a different keyword or phrasing." 
+            <p className="font-sans text-[12px] text-muted-foreground/70 mb-4">
+              {hasFilters 
+                ? "Try adjusting your search or filters." 
                 : "Create a note to start capturing your ideas."}
             </p>
+            {hasFilters && (
+              <button 
+                onClick={clearFilters}
+                className="text-[11.5px] font-medium text-primary bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-md transition-colors active:scale-95"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-0.5 px-2">

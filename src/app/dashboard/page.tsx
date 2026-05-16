@@ -10,7 +10,6 @@ import { NoteEditor } from "@/components/notes/note-editor";
 import { EmptyWorkspace } from "@/components/notes/empty-workspace";
 import { cn } from "@/lib/utils";
 
-// 🛡️ Main dashboard component that pulls URL state 
 function DashboardContent() {
   const [notes, setNotes] = React.useState<NoteItemData[]>([]);
   const [selectedNote, setSelectedNote] = React.useState<NoteItemData | null>(null);
@@ -21,19 +20,27 @@ function DashboardContent() {
   const viewMode = searchParams.get("view") || "active";
   const isArchivedView = viewMode === "archived";
 
-  // Reactive fetcher that targets dynamic view routes
   const fetchNotes = React.useCallback(async (shouldSelectFirst = false) => {
     setIsLoading(true);
     try {
-      // Compute appropriate route matching query
-      const endpoint = isArchivedView ? "/api/notes?archived=true" : "/api/notes";
+      const params = new URLSearchParams();
+      if (isArchivedView) params.append("archived", "true");
+      
+      const tag = searchParams.get("tag");
+      const category = searchParams.get("category");
+      const sort = searchParams.get("sort");
+      
+      if (tag) params.append("tag", tag);
+      if (category) params.append("category", category);
+      if (sort) params.append("sort", sort);
+
+      const endpoint = `/api/notes?${params.toString()}`;
       
       const response = await fetch(endpoint);
       const data = await response.json();
 
       if (data.success) {
         setNotes(data.notes);
-        // Reset selected note if it doesn't belong to active view, or pick new first
         if (shouldSelectFirst && data.notes.length > 0) {
           setSelectedNote(data.notes[0]);
         } else {
@@ -47,9 +54,8 @@ function DashboardContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [isArchivedView]);
+  }, [isArchivedView, searchParams]);
 
-  // Listen to parameter changes to reset and refetch lists
   React.useEffect(() => {
     fetchNotes(true);
   }, [fetchNotes]);
@@ -67,7 +73,6 @@ function DashboardContent() {
 
       const data = await response.json();
       if (data.success) {
-        // Standard note creation prepends new item to lists
         setNotes((prev) => [data.note, ...prev]);
         setSelectedNote(data.note);
         toast.success("New canvas ready.", { duration: 2000 });
@@ -95,7 +100,6 @@ function DashboardContent() {
   return (
     <div className="flex flex-1 h-full w-full overflow-hidden bg-background animate-in fade-in duration-200">
       
-      {/* 📜 SIDEBAR NOTES COLUMN */}
       <div
         className={cn(
           "w-full md:w-[280px] lg:w-[320px] xl:w-[340px] flex-shrink-0 flex flex-col h-full border-r border-border/20 bg-background transition-all duration-200",
@@ -122,7 +126,6 @@ function DashboardContent() {
         />
       </div>
 
-      {/* 🖊️ MAIN EDITOR COLUMN */}
       <main
         className={cn(
           "flex-1 flex flex-col h-full overflow-hidden bg-background transition-all duration-200 relative",
@@ -160,7 +163,6 @@ function DashboardContent() {
   );
 }
 
-// Global Fallback Suspense shell
 function DashboardLoader() {
   return (
     <div className="flex flex-1 h-screen w-full items-center justify-center bg-background">
@@ -172,7 +174,6 @@ function DashboardLoader() {
   );
 }
 
-// Export standard component wrapped in static safe Suspense
 export default function NotesDashboard() {
   return (
     <React.Suspense fallback={<DashboardLoader />}>

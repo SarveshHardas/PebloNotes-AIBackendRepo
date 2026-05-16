@@ -99,6 +99,9 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const includeArchived = searchParams.get("archived") === "true";
+    const tag = searchParams.get("tag");
+    const category = searchParams.get("category");
+    const sort = searchParams.get("sort") || "updatedAt_desc";
 
     const query: any = { userId: authUser.id };
     
@@ -108,8 +111,17 @@ export async function GET(req: Request) {
       query.archived = false;
     }
 
+    if (tag) query.tags = tag;
+    if (category) query.category = category === "none" ? null : category;
+
+    let sortObj: any = { updatedAt: -1 };
+    if (sort === "updatedAt_desc") sortObj = { updatedAt: -1 };
+    else if (sort === "updatedAt_asc") sortObj = { updatedAt: 1 };
+    else if (sort === "title_asc") sortObj = { title: 1 };
+    else if (sort === "title_desc") sortObj = { title: -1 };
+
     const notes = await Note.find(query)
-      .sort({ updatedAt: -1 })
+      .sort(sortObj)
       .populate("tags")
       .populate("category")
       .lean();
