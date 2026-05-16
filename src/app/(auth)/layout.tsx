@@ -14,7 +14,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-12 select-none overflow-hidden bg-background">
-      <div className="relative hidden lg:flex lg:col-span-5 xl:col-span-4 flex-col justify-between overflow-hidden bg-zinc-50 dark:bg-zinc-900/30 border-r border-border/50 p-10 xl:p-12">
+      <div className="relative hidden lg:flex lg:col-span-5 xl:col-span-4 flex-col justify-between overflow-hidden bg-muted/30 border-r border-border/50 p-10 xl:p-12">
         
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.07]"
           style={{
@@ -25,12 +25,13 @@ export default function AuthLayout({
 
         <div className="relative z-10 flex items-center gap-3">
           <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
-            <div className="relative h-16 w-16">
+            <div className="flex items-center justify-center overflow-hidden">
               <Image
                 src="/peblo-logo.png"
                 alt="Peblo Notes"
-                fill
-                className="object-contain scale-300 translate-x-4"
+                width={85}
+                height={85}
+                className="object-contain -ml-4"
                 priority
               />
             </div>
@@ -99,12 +100,13 @@ export default function AuthLayout({
 
         <div className="mx-auto w-full max-w-[400px]">
           <div className="lg:hidden flex justify-center mb-8">
-            <div className="relative h-16 w-48">
+            <div className="flex items-center justify-center overflow-hidden">
               <Image
                 src="/peblo-logo.png"
                 alt="Peblo Notes"
-                fill
-                className="object-contain invert-0 dark:invert"
+                width={85}
+                height={85}
+                className="object-contain"
                 priority
               />
             </div>

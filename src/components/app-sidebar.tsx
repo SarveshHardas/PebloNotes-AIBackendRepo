@@ -144,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <div className="flex items-center justify-between w-full">
               <div className="grid flex-1 ml-1 text-left leading-tight font-sans group-data-[collapsible=icon]:hidden px-2">
-                <Image src="/peblo-logo.png" alt="Peblo Notes" width={120} height={120} className="-translate-x-[30px]" />
+                <Image src="/peblo-logo.png" alt="Peblo Notes" width={85} height={85} className="-ml-4 sm:-ml-2 object-contain" />
                 <span className="truncate text-sm text-secondary-foreground/80 font-medium">
                   Notes Workspace
                 </span>
