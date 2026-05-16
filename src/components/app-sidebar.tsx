@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, Home, LogOut, Sparkles, Archive } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { BookOpen, Home, LogOut, Sparkles, Archive, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +19,17 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+
 function SidebarNavigationMenu() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   
   const view = searchParams.get("view") || "active";
-  const isArchiveActive = view === "archived";
-  const isAllNotesActive = view === "active" || !searchParams.has("view");
+  const isArchiveActive = view === "archived" && pathname === "/dashboard";
+  const isAllNotesActive = (view === "active" || !searchParams.has("view")) && pathname === "/dashboard";
+  const isAnalyticsActive = pathname === "/dashboard/analytics";
 
   return (
     <SidebarMenu className="gap-1">
@@ -61,6 +64,23 @@ function SidebarNavigationMenu() {
         >
           <Archive className={cn("size-4", isArchiveActive ? "text-primary" : "text-muted-foreground")} />
           <span>Archived Notes</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          tooltip="Analytics" 
+          isActive={isAnalyticsActive}
+          onClick={() => router.push("/dashboard/analytics")}
+          className={cn(
+            "font-sans text-[13px] py-5 transition-all",
+            isAnalyticsActive 
+              ? "font-semibold bg-primary/5 text-primary hover:bg-primary/10" 
+              : "font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <BarChart3 className={cn("size-4", isAnalyticsActive ? "text-primary" : "text-muted-foreground")} />
+          <span>Analytics</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
